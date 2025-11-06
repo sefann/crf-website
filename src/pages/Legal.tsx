@@ -96,14 +96,14 @@ const Legal = () => {
               </h3>
               <p>
                 You have the right to access, update, or delete your personal information at any time. 
-                To exercise these rights, please contact us at contact@childrightsfoundation.com.
+                To exercise these rights, please contact us at contact@thechildrightsfoundation.org.
               </p>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Terms & Conditions */}
+      {/* Terms & Conditions Link */}
       <section className="section-padding bg-accent-gray">
         <div className="container-custom">
           <motion.div
@@ -111,56 +111,22 @@ const Legal = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="max-w-4xl mx-auto"
+            className="max-w-4xl mx-auto text-center"
             data-aos="fade-up"
           >
-            <div className="flex items-center space-x-4 mb-6">
+            <div className="flex items-center justify-center space-x-4 mb-6">
               <FileText className="text-primary-gold" size={40} />
               <h2 className="text-4xl font-heading font-bold text-secondary-blue">
                 Terms & Conditions
               </h2>
             </div>
-            <div className="prose max-w-none text-text-charcoal space-y-4">
-              <p className="text-lg">
-                <strong>Last Updated:</strong> January 2024
+            <div className="bg-white p-8 rounded-lg shadow-lg">
+              <p className="text-lg text-text-charcoal mb-6">
+                Our Terms of Service have been moved to a separate page for better organization and clarity.
               </p>
-              <p>
-                By accessing and using the Child Rights Foundation (CRF) website, you accept and agree 
-                to be bound by the terms and provision of this agreement.
-              </p>
-              <h3 className="text-2xl font-heading font-bold text-secondary-blue mt-8 mb-4">
-                Use of Website
-              </h3>
-              <p>
-                The content of this website is for general information and use only. It is subject to 
-                change without notice. Neither we nor any third parties provide any warranty or guarantee 
-                as to the accuracy, timeliness, performance, completeness, or suitability of the information 
-                and materials found or offered on this website.
-              </p>
-              <h3 className="text-2xl font-heading font-bold text-secondary-blue mt-8 mb-4">
-                Donations
-              </h3>
-              <p>
-                All donations made through our website are final and non-refundable unless otherwise 
-                specified. Donations are used to support CRF's programs and operations in accordance 
-                with our mission and objectives.
-              </p>
-              <h3 className="text-2xl font-heading font-bold text-secondary-blue mt-8 mb-4">
-                Intellectual Property
-              </h3>
-              <p>
-                This website contains material which is owned by or licensed to us. This material includes, 
-                but is not limited to, the design, layout, look, appearance, and graphics. Reproduction is 
-                prohibited other than in accordance with the copyright notice, which forms part of these 
-                terms and conditions.
-              </p>
-              <h3 className="text-2xl font-heading font-bold text-secondary-blue mt-8 mb-4">
-                Limitation of Liability
-              </h3>
-              <p>
-                CRF shall not be liable for any indirect, incidental, special, consequential, or punitive 
-                damages resulting from your use of or inability to use the website.
-              </p>
+              <a href="/terms-of-service" className="btn-primary inline-block">
+                View Terms of Service
+              </a>
             </div>
           </motion.div>
         </div>

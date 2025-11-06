@@ -299,8 +299,8 @@ const GetInvolved = () => {
             >
               <Mail className="text-primary-gold mx-auto mb-4" size={40} />
               <h3 className="font-heading font-bold text-secondary-blue mb-2">Email</h3>
-              <a href="mailto:contact@childrightsfoundation.com" className="text-text-charcoal hover:text-primary-gold">
-                contact@childrightsfoundation.com
+              <a href="mailto:contact@thechildrightsfoundation.org" className="text-text-charcoal hover:text-primary-gold">
+                contact@thechildrightsfoundation.org
               </a>
             </motion.div>
           </div>

@@ -4,12 +4,18 @@ import { ArrowRight } from 'lucide-react'
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-secondary-blue via-secondary-blue to-primary-gold text-white overflow-hidden">
-      {/* Background overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-40 z-0"></div>
+    <section className="relative min-h-screen flex items-center justify-center text-white overflow-hidden">
+      {/* Background image */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="/images/home-banner.png" 
+          alt="Child Rights Foundation" 
+          className="w-full h-full object-cover"
+        />
+      </div>
       
-      {/* Background image placeholder - replace with actual image */}
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=1920')] bg-cover bg-center z-0"></div>
+      {/* Background overlay - black transparent overlay */}
+      <div className="absolute inset-0 bg-black/70 z-[1]"></div>
       
       <div className="container-custom relative z-10 text-center">
         <motion.div

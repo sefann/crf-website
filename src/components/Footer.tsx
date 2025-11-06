@@ -8,7 +8,11 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* About Section */}
           <div>
-            <h3 className="text-xl font-heading font-bold mb-4 text-primary-gold">About CRF</h3>
+            <img 
+              src="/crf-logofooter.svg" 
+              alt="Child Rights Foundation" 
+              className="h-48 w-auto mb-4"
+            />
             <p className="text-sm mb-4">
               Developing the Child Today for a Better Tomorrow. Empowering, protecting, and promoting child rights across Africa.
             </p>
@@ -47,8 +51,8 @@ const Footer = () => {
               </li>
               <li className="flex items-center space-x-2">
                 <Mail size={18} className="text-primary-gold" />
-                <a href="mailto:contact@childrightsfoundation.com" className="hover:text-primary-gold transition-colors">
-                  contact@childrightsfoundation.com
+                <a href="mailto:contact@thechildrightsfoundation.org" className="hover:text-primary-gold transition-colors">
+                  contact@thechildrightsfoundation.org
                 </a>
               </li>
             </ul>
@@ -71,14 +75,25 @@ const Footer = () => {
                 <Linkedin size={24} />
               </a>
             </div>
-            <Link to="/legal" className="text-sm hover:text-primary-gold transition-colors">
-              Legal / Privacy Policy
+            <Link to="/faq" className="text-sm hover:text-primary-gold transition-colors">
+              FAQ
             </Link>
           </div>
         </div>
 
         <div className="border-t border-gray-600 mt-8 pt-8 text-center text-sm">
-          <p>&copy; {new Date().getFullYear()} Child Rights Foundation (CRF). All rights reserved.</p>
+          <p className="mb-2">
+            &copy; {new Date().getFullYear()} Child Rights Foundation (CRF). All rights reserved.
+          </p>
+          <div className="flex justify-center items-center space-x-4">
+            <Link to="/legal" className="hover:text-primary-gold transition-colors">
+              Legal / Privacy Policy
+            </Link>
+            <span className="text-gray-400">|</span>
+            <Link to="/terms-of-service" className="hover:text-primary-gold transition-colors">
+              Terms of Service
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

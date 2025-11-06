@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
-import { Users, Heart, GraduationCap, Award, Quote } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Users, Heart, GraduationCap, Award, Quote, ArrowRight, BookOpen, Sparkles, Target } from 'lucide-react'
 
 const AishaCares = () => {
   const highlights = [
@@ -12,6 +13,7 @@ const AishaCares = () => {
       icon: GraduationCap,
       title: 'University Tours',
       description: 'Engaging with university students to provide mentorship, career guidance, and support for their academic and personal development.',
+      link: '/university-tours',
     },
     {
       icon: Heart,
@@ -117,7 +119,7 @@ const AishaCares = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {highlights.map((highlight, index) => {
               const Icon = highlight.icon
-              return (
+              const content = (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 30 }}
@@ -134,10 +136,26 @@ const AishaCares = () => {
                   <h3 className="text-2xl font-heading font-bold text-secondary-blue mb-3">
                     {highlight.title}
                   </h3>
-                  <p className="text-text-charcoal leading-relaxed">
+                  <p className="text-text-charcoal leading-relaxed mb-4">
                     {highlight.description}
                   </p>
+                  {highlight.link && (
+                    <Link
+                      to={highlight.link}
+                      className="text-primary-gold font-semibold hover:underline inline-flex items-center space-x-2"
+                    >
+                      <span>Learn More</span>
+                      <ArrowRight size={16} />
+                    </Link>
+                  )}
                 </motion.div>
+              )
+              return highlight.link ? (
+                <Link key={index} to={highlight.link} className="block">
+                  {content}
+                </Link>
+              ) : (
+                content
               )
             })}
           </div>
@@ -227,8 +245,164 @@ const AishaCares = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* The Bridge Section */}
       <section className="section-padding bg-secondary-blue text-white">
+        <div className="container-custom">
+          <div className="max-w-4xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-12"
+              data-aos="fade-up"
+            >
+              <h2 className="text-4xl md:text-5xl font-heading font-bold mb-4">
+                About The Bridge
+              </h2>
+              <p className="text-xl text-white/90 italic mb-2">
+                "Celebrating Our Passage on the Bridge."
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="mb-12"
+              data-aos="fade-up"
+            >
+              <p className="text-lg text-white/90 leading-relaxed mb-6">
+                The Bridge by Aisha is more than an event – it is a movement of women, stories, mentorship, and legacy. 
+                Founded by Aisha Abdullahi Adamu, The Bridge creates an intimate and elegant space where women come together 
+                to share real stories of growth, resilience, motherhood, career, identity, and legacy.
+              </p>
+              <p className="text-lg text-white/90 leading-relaxed">
+                From its first edition in 2024, The Bridge has evolved into a luxury society brunch experience, blending 
+                soulful storytelling, mentorship, and intentional community-building. Every detail—from the curated guest 
+                list to the rituals like the Bridge Toast and Memory Bridge Wall—is designed to celebrate the journeys of 
+                women as they cross from one season of life to another.
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="bg-white/10 p-6 rounded-lg"
+                data-aos="fade-right"
+              >
+                <h3 className="text-2xl font-heading font-bold mb-4 text-primary-gold">Vision</h3>
+                <p className="text-white/90 leading-relaxed">
+                  To build an intergenerational sisterhood where women are empowered to honor their journeys, share their 
+                  stories, receive mentorship, and shape new legacies of strength, elegance, and leadership.
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="bg-white/10 p-6 rounded-lg"
+                data-aos="fade-left"
+              >
+                <h3 className="text-2xl font-heading font-bold mb-4 text-primary-gold">Mission</h3>
+                <p className="text-white/90 leading-relaxed">
+                  Through storytelling, mentorship, and carefully curated experiences, The Bridge inspires women to embrace 
+                  transitions with courage, clarity, and confidence, while building a community that transcends events and 
+                  lives on as a legacy network.
+                </p>
+              </motion.div>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="mb-12"
+              data-aos="fade-up"
+            >
+              <h3 className="text-3xl font-heading font-bold mb-6 text-center">Core Elements</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[
+                  {
+                    icon: BookOpen,
+                    title: 'Storytelling',
+                    description: 'Real, raw, and powerful narratives from women across generations.',
+                  },
+                  {
+                    icon: Users,
+                    title: 'Mentorship',
+                    description: 'Formal and informal mentorship programs connecting emerging leaders with seasoned icons.',
+                  },
+                  {
+                    icon: Heart,
+                    title: 'Intimacy',
+                    description: 'A private, elegant, and intentional setting with a carefully selected guest list.',
+                  },
+                  {
+                    icon: Sparkles,
+                    title: 'Tradition',
+                    description: 'Rituals like the Bridge Toast, keepsake gifts, and the evolving annual theme.',
+                  },
+                  {
+                    icon: Users,
+                    title: 'Community',
+                    description: 'Formation of the Bridge Sisters alumni network, designed to sustain bonds beyond the brunch.',
+                  },
+                  {
+                    icon: Target,
+                    title: 'Legacy',
+                    description: 'Expansion into mentorship programs, retreats, scholarships, and archival projects.',
+                  },
+                ].map((element, index) => {
+                  const Icon = element.icon
+                  return (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.6, delay: index * 0.1 }}
+                      className="bg-white/10 p-5 rounded-lg"
+                      data-aos="fade-up"
+                      data-aos-delay={index * 50}
+                    >
+                      <Icon className="text-primary-gold mb-3" size={32} />
+                      <h4 className="text-xl font-heading font-bold mb-2">{element.title}</h4>
+                      <p className="text-white/90 text-sm">{element.description}</p>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="text-center bg-white/10 p-8 rounded-lg"
+              data-aos="fade-up"
+            >
+              <h3 className="text-2xl font-heading font-bold mb-4 text-primary-gold">Impact</h3>
+              <p className="text-lg text-white/90 leading-relaxed">
+                The Bridge has already inspired hundreds of women across Nigeria, with ripple effects reaching global 
+                communities. By curating spaces of authenticity, excellence, and mentorship, The Bridge positions itself 
+                as Africa's pioneering luxury storytelling brunch with a vision for long-term legacy and global chapters.
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="section-padding bg-primary-gold text-white">
         <div className="container-custom text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -244,9 +418,14 @@ const AishaCares = () => {
               Whether you're a young woman looking for mentorship or an experienced woman ready to 
               become a Big Sister, we welcome you to join our community.
             </p>
-            <a href="/get-involved" className="btn-primary bg-white text-secondary-blue hover:bg-accent-gray inline-block">
-              Get Involved
-            </a>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link to="/get-involved" className="btn-primary bg-white text-secondary-blue hover:bg-accent-gray inline-block">
+                Get Involved
+              </Link>
+              <a href="mailto:aishacares@thechildrightsfoundation.org" className="btn-outline border-white text-white hover:bg-white hover:text-secondary-blue inline-block">
+                Email Us
+              </a>
+            </div>
           </motion.div>
         </div>
       </section>
