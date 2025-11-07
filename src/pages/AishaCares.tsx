@@ -10,12 +10,6 @@ const AishaCares = () => {
       description: 'A mentorship program connecting experienced women with young women, creating a supportive network for growth and development.',
     },
     {
-      icon: GraduationCap,
-      title: 'University Tours',
-      description: 'Engaging with university students to provide mentorship, career guidance, and support for their academic and personal development.',
-      link: '/university-tours',
-    },
-    {
       icon: Heart,
       title: 'Annual Women\'s Conference',
       description: 'A gathering of women from across Northern Nigeria to share experiences, learn, and build networks for empowerment.',
