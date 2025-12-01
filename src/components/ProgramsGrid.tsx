@@ -58,15 +58,8 @@ const ProgramsGrid = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {programs.map((program, index) => {
             const Icon = program.icon
-            const content = (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-primary-gold group cursor-pointer h-full flex flex-col"
-              >
+            const cardContent = (
+              <>
                 <div className="bg-primary-gold bg-opacity-10 w-16 h-16 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary-gold transition-colors">
                   <Icon className="text-primary-gold group-hover:text-white transition-colors" size={32} />
                 </div>
@@ -76,23 +69,35 @@ const ProgramsGrid = () => {
                 <p className="text-text-charcoal flex-grow">
                   {program.description}
                 </p>
-                {program.link && (
-                  <Link
-                    to={program.link}
-                    className="mt-4 text-primary-gold font-semibold hover:underline inline-flex items-center"
-                  >
+                {program.link ? (
+                  <span className="mt-4 text-primary-gold font-semibold inline-flex items-center">
                     Learn More →
-                  </Link>
-                )}
+                  </span>
+                ) : null}
+              </>
+            )
+
+            const cardWrapper = (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className={`bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-primary-gold group h-full flex flex-col ${
+                  program.link ? 'cursor-pointer' : ''
+                }`}
+              >
+                {cardContent}
               </motion.div>
             )
 
             return program.link ? (
               <Link key={index} to={program.link} className="block h-full">
-                {content}
+                {cardWrapper}
               </Link>
             ) : (
-              content
+              cardWrapper
             )
           })}
         </div>

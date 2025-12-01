@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { GraduationCap, Users, BookOpen, Award, MapPin, Calendar, Quote, Heart, ArrowRight, DollarSign, Target } from 'lucide-react'
+import { GraduationCap, Users, BookOpen, Award, Heart, ArrowRight, DollarSign, Target } from 'lucide-react'
 
 const UniversityTours = () => {
   const impactData = [

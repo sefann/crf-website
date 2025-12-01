@@ -150,7 +150,7 @@ export const initializeMonnify = (config: PaymentConfig) => {
       paymentDescription: paymentData.paymentDescription,
       isTestMode: import.meta.env.VITE_MONNIFY_TEST_MODE === 'true',
       metadata: paymentData.metadata,
-      onComplete: function(response: any) {
+      onComplete: function(_response: any) {
         // Handle successful payment
         window.location.href = paymentData.redirectUrl
       },

@@ -250,11 +250,9 @@ const Navbar = () => {
               <Link
                 to="/donate"
                 onClick={() => setIsOpen(false)}
-                className="block mt-4"
+                className="btn-primary w-full block mt-4 text-center"
               >
-                <button className="btn-primary w-full">
-                  Donate
-                </button>
+                Donate
               </Link>
             </div>
           </motion.div>

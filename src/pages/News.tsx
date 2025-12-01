@@ -251,7 +251,10 @@ const News = () => {
           if (result.status === 'fulfilled') {
             aggregated.push(...result.value)
           } else {
-            console.warn('Feed request failed', result.reason)
+            // Only log non-abort errors (abort errors are expected when component unmounts)
+            if (result.reason?.name !== 'AbortError' && !controller.signal.aborted) {
+              console.warn('Feed request failed', result.reason)
+            }
           }
         }
 
@@ -275,7 +278,10 @@ const News = () => {
         }
       } catch (error) {
         if (controller.signal.aborted) return
-        console.error('Failed to load NGO news feed', error)
+        // Only log non-abort errors
+        if (error instanceof Error && error.name !== 'AbortError') {
+          console.error('Failed to load NGO news feed', error)
+        }
         setNgoNews(fallbackNgoNews)
         setNgoNewsError(
           'We could not refresh the live news feeds right now. Showing recent highlights from trusted partners instead.'

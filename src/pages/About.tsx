@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Award, Target, Users, Heart, Lightbulb, Handshake } from 'lucide-react'
+import { Award, Target, Heart, Lightbulb, Handshake } from 'lucide-react'
 
 const About = () => {
   const objectives = [

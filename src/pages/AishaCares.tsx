@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Users, Heart, GraduationCap, Award, Quote, ArrowRight, BookOpen, Sparkles, Target } from 'lucide-react'
+import { Users, Heart, Award, BookOpen, Sparkles, Target, Quote } from 'lucide-react'
 
 const AishaCares = () => {
   const highlights = [
@@ -113,7 +113,7 @@ const AishaCares = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {highlights.map((highlight, index) => {
               const Icon = highlight.icon
-              const content = (
+              return (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 30 }}
@@ -133,23 +133,7 @@ const AishaCares = () => {
                   <p className="text-text-charcoal leading-relaxed mb-4">
                     {highlight.description}
                   </p>
-                  {highlight.link && (
-                    <Link
-                      to={highlight.link}
-                      className="text-primary-gold font-semibold hover:underline inline-flex items-center space-x-2"
-                    >
-                      <span>Learn More</span>
-                      <ArrowRight size={16} />
-                    </Link>
-                  )}
                 </motion.div>
-              )
-              return highlight.link ? (
-                <Link key={index} to={highlight.link} className="block">
-                  {content}
-                </Link>
-              ) : (
-                content
               )
             })}
           </div>

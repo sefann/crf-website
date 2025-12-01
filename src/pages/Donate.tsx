@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Heart, Gift, School, Utensils, Users, ArrowRight, Shield } from 'lucide-react'
+import { Heart, Gift, School, Utensils, Users, Shield } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { detectCurrency, getCurrencySymbol } from '../utils/currency'
 import { processPayment, getRecommendedGateway, type PaymentConfig } from '../utils/payments'
@@ -62,7 +62,7 @@ const Donate = () => {
     setIsProcessing(true)
 
     const paymentConfig: PaymentConfig = {
-      amount: typeof amount === 'number' ? amount : parseFloat(amount.toString()),
+      amount: amount,
       currency: currency,
       email: donorEmail,
       name: donorName,
