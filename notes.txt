@@ -1,0 +1,1 @@
+- Work on the payments and implement international payments gateways (/donate) page
