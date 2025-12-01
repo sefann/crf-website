@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion'
-import { Heart, Gift, School, Utensils, Users, Shield } from 'lucide-react'
-import { useState, useEffect } from 'react'
-import { detectCurrency, getCurrencySymbol } from '../utils/currency'
-import { processPayment, getRecommendedGateway, type PaymentConfig } from '../utils/payments'
+import { Heart, Gift, School, Utensils, Users, Shield, AlertCircle, ChevronDown } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { detectCurrency, getCurrencySymbol, CURRENCY_INFO, SUPPORTED_CURRENCIES } from '../utils/currency'
+import { processPayment, getRecommendedGateway, getAvailableGateways, type PaymentConfig, type PaymentGateway } from '../utils/payments'
+import { getBankAccountDetails, getContactEmail, isBankDetailsConfigured } from '../utils/config'
 
 const Donate = () => {
   const [currency, setCurrency] = useState<string>('NGN')
@@ -10,8 +11,11 @@ const Donate = () => {
   const [customAmount, setCustomAmount] = useState<number | "">("")
   const [donorName, setDonorName] = useState<string>("")
   const [donorEmail, setDonorEmail] = useState<string>("")
-  const [selectedGateway, setSelectedGateway] = useState<'paystack' | 'stripe' | 'monnify'>('paystack')
+  const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [isCurrencyDropdownOpen, setIsCurrencyDropdownOpen] = useState(false)
+  const currencyDropdownRef = useRef<HTMLDivElement>(null)
 
   // Optional preset tiers (for quick clicks)
   const donationTiers: Record<string, number[]> = {
@@ -25,16 +29,40 @@ const Donate = () => {
     const detected = detectCurrency()
     setCurrency(detected)
     setCurrencySymbol(getCurrencySymbol(detected))
-    // Set recommended gateway based on currency
-    setSelectedGateway(getRecommendedGateway(detected))
+    // Auto-select recommended gateway based on currency
+    const recommended = getRecommendedGateway(detected)
+    setSelectedGateway(recommended)
   }, [])
+
+  // Update gateway when currency changes
+  useEffect(() => {
+    const recommended = getRecommendedGateway(currency)
+    setSelectedGateway(recommended)
+    setError(null)
+  }, [currency])
+
+  // Close currency dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (currencyDropdownRef.current && !currencyDropdownRef.current.contains(event.target as Node)) {
+        setIsCurrencyDropdownOpen(false)
+      }
+    }
+
+    if (isCurrencyDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isCurrencyDropdownOpen])
 
   const handleCurrencyChange = (newCurrency: string) => {
     setCurrency(newCurrency)
     setCurrencySymbol(getCurrencySymbol(newCurrency))
     setCustomAmount("") // Reset custom amount when currency changes
-    // Update recommended gateway for new currency
-    setSelectedGateway(getRecommendedGateway(newCurrency))
+    setError(null)
   }
 
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,19 +71,34 @@ const Donate = () => {
   }
 
   const handleDonate = async (amount: number | "") => {
+    setError(null)
+
+    // Validate amount
     if (!amount || amount <= 0) {
-      alert("Please enter a donation amount.")
+      setError("Please enter a donation amount.")
       return
     }
 
-    // Check if name and email are provided
+    // Validate name
     if (!donorName.trim()) {
-      alert("Please enter your name.")
+      setError("Please enter your name.")
       return
     }
 
+    // Validate email
     if (!donorEmail.trim() || !donorEmail.includes('@')) {
-      alert("Please enter a valid email address.")
+      setError("Please enter a valid email address.")
+      return
+    }
+
+    // Validate gateway selection
+    if (!selectedGateway) {
+      const available = getAvailableGateways(currency)
+      if (available.length === 0) {
+        setError(`No payment method available for ${currency}. Please contact us at donate@thechildrightsfoundation.org`)
+        return
+      }
+      setError("Please select a payment method.")
       return
     }
 
@@ -64,8 +107,8 @@ const Donate = () => {
     const paymentConfig: PaymentConfig = {
       amount: amount,
       currency: currency,
-      email: donorEmail,
-      name: donorName,
+      email: donorEmail.trim(),
+      name: donorName.trim(),
       metadata: {
         source: 'website',
         donation_type: 'general',
@@ -74,10 +117,11 @@ const Donate = () => {
     }
 
     try {
-      processPayment(paymentConfig, selectedGateway)
-    } catch (error) {
+      await processPayment(paymentConfig, selectedGateway)
+      // Payment gateway will handle redirect, so we don't reset processing state here
+    } catch (error: any) {
       console.error('Payment error:', error)
-      alert('An error occurred while processing your payment. Please try again or contact us.')
+      setError(error.message || 'An error occurred while processing your payment. Please try again or contact us.')
       setIsProcessing(false)
     }
   }
@@ -290,19 +334,29 @@ const Donate = () => {
               </p>
             </div>
             
-            <div className="space-y-6">
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault()
+                handleDonate(customAmount)
+              }}
+              className="space-y-6"
+              id="donation-form-element"
+              data-form-filler="true"
+            >
               <div>
                 <label htmlFor="donor-name" className="block text-sm font-semibold text-secondary-blue mb-2">
                   Your Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="donor-name"
+                  name="donorName"
                   type="text"
                   placeholder="Enter your full name"
                   value={donorName}
                   onChange={(e) => setDonorName(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-gold focus:border-transparent"
                   required
+                  autoComplete="name"
                 />
               </div>
 
@@ -312,12 +366,14 @@ const Donate = () => {
                 </label>
                 <input
                   id="donor-email"
+                  name="donorEmail"
                   type="email"
                   placeholder="Enter your email"
                   value={donorEmail}
                   onChange={(e) => setDonorEmail(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-gold focus:border-transparent"
                   required
+                  autoComplete="email"
                 />
               </div>
 
@@ -329,6 +385,7 @@ const Donate = () => {
                   <span className="text-text-charcoal font-semibold text-lg">{currencySymbol}</span>
                   <input
                     id="donation-amount"
+                    name="donationAmount"
                     type="number"
                     min="0"
                     step="0.01"
@@ -337,135 +394,179 @@ const Donate = () => {
                     onChange={handleCustomChange}
                     className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-gold focus:border-transparent text-lg"
                     required
+                    autoComplete="transaction-amount"
                   />
                 </div>
               </div>
 
-              {/* Payment Gateway Selection */}
+              {/* Payment Gateway Selection - Auto-filtered by availability */}
               <div>
                 <label className="block text-sm font-semibold text-secondary-blue mb-2">
                   Payment Method <span className="text-red-500">*</span>
                 </label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (currency === 'NGN') {
-                        setSelectedGateway('paystack')
-                      } else {
-                        alert('Paystack only supports NGN. Please change currency to NGN to use Paystack.')
-                      }
-                    }}
-                    disabled={currency !== 'NGN'}
-                    className={`p-4 border-2 rounded-lg transition-all ${
-                      selectedGateway === 'paystack' && currency === 'NGN'
-                        ? 'border-primary-gold bg-primary-gold/10'
-                        : currency === 'NGN'
-                        ? 'border-gray-300 hover:border-primary-gold/50'
-                        : 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
-                    }`}
-                  >
-                    <img 
-                      src="/logos/Paystack-Logo.png" 
-                      alt="Paystack" 
-                      className={`mx-auto mb-2 h-12 w-auto object-contain ${currency !== 'NGN' ? 'opacity-40' : ''}`}
-                    />
-                    <p className={`font-semibold text-sm ${currency === 'NGN' ? 'text-text-charcoal' : 'text-gray-400'}`}>Paystack</p>
-                    <p className={`text-xs ${currency === 'NGN' ? 'text-text-charcoal' : 'text-gray-400'}`}>Cards & Bank</p>
-                    {currency !== 'NGN' && (
-                      <p className="text-xs text-red-500 mt-1">NGN only</p>
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (['USD', 'EUR', 'GBP'].includes(currency)) {
-                        setSelectedGateway('stripe')
-                      } else {
-                        alert('Stripe supports USD, EUR, and GBP. Please change currency to use Stripe.')
-                      }
-                    }}
-                    disabled={!['USD', 'EUR', 'GBP'].includes(currency)}
-                    className={`p-4 border-2 rounded-lg transition-all ${
-                      selectedGateway === 'stripe' && ['USD', 'EUR', 'GBP'].includes(currency)
-                        ? 'border-primary-gold bg-primary-gold/10'
-                        : ['USD', 'EUR', 'GBP'].includes(currency)
-                        ? 'border-gray-300 hover:border-primary-gold/50'
-                        : 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
-                    }`}
-                  >
-                    <img 
-                      src="/logos/Stripe-Logo.png" 
-                      alt="Stripe" 
-                      className={`mx-auto mb-2 h-12 w-auto object-contain ${!['USD', 'EUR', 'GBP'].includes(currency) ? 'opacity-40' : ''}`}
-                    />
-                    <p className={`font-semibold text-sm ${['USD', 'EUR', 'GBP'].includes(currency) ? 'text-text-charcoal' : 'text-gray-400'}`}>Stripe</p>
-                    <p className={`text-xs ${['USD', 'EUR', 'GBP'].includes(currency) ? 'text-text-charcoal' : 'text-gray-400'}`}>Cards & More</p>
-                    {!['USD', 'EUR', 'GBP'].includes(currency) && (
-                      <p className="text-xs text-red-500 mt-1">USD/EUR/GBP</p>
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (currency === 'NGN') {
-                        setSelectedGateway('monnify')
-                      } else {
-                        alert('Monnify only supports NGN. Please change currency to NGN to use Monnify.')
-                      }
-                    }}
-                    disabled={currency !== 'NGN'}
-                    className={`p-4 border-2 rounded-lg transition-all ${
-                      selectedGateway === 'monnify' && currency === 'NGN'
-                        ? 'border-primary-gold bg-primary-gold/10'
-                        : currency === 'NGN'
-                        ? 'border-gray-300 hover:border-primary-gold/50'
-                        : 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
-                    }`}
-                  >
-                    <img 
-                      src="/logos/monnify-logo.png" 
-                      alt="Monnify" 
-                      className={`mx-auto mb-2 h-12 w-auto object-contain ${currency !== 'NGN' ? 'opacity-40' : ''}`}
-                    />
-                    <p className={`font-semibold text-sm ${currency === 'NGN' ? 'text-text-charcoal' : 'text-gray-400'}`}>Monnify</p>
-                    <p className={`text-xs ${currency === 'NGN' ? 'text-text-charcoal' : 'text-gray-400'}`}>Cards & Transfer</p>
-                    {currency !== 'NGN' && (
-                      <p className="text-xs text-red-500 mt-1">NGN only</p>
-                    )}
-                  </button>
-                </div>
-                <p className="text-xs text-text-charcoal mt-2 text-center">
-                  {currency === 'NGN' 
-                    ? 'Paystack and Monnify are available for NGN payments'
-                    : 'Stripe is available for USD, EUR, and GBP payments. Change currency to NGN for Paystack or Monnify.'
+                {(() => {
+                  const availableGateways = getAvailableGateways(currency)
+                  
+                  if (availableGateways.length === 0) {
+                    return (
+                      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div className="flex items-start space-x-2">
+                          <AlertCircle className="text-yellow-600 mt-0.5" size={20} />
+                          <div>
+                            <p className="text-sm font-semibold text-yellow-800">No payment method available</p>
+                            <p className="text-xs text-yellow-700 mt-1">
+                              No payment gateway is configured for {currency}. Please contact us at{' '}
+                              <a href="mailto:donate@thechildrightsfoundation.org" className="underline">
+                                donate@thechildrightsfoundation.org
+                              </a>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )
                   }
-                </p>
+
+                  const gatewayConfigs = {
+                    paystack: {
+                      name: 'Paystack',
+                      logo: '/logos/Paystack-Logo.png',
+                      description: 'Cards & Bank Transfer',
+                      supported: ['NGN'],
+                    },
+                    stripe: {
+                      name: 'Stripe',
+                      logo: '/logos/Stripe-Logo.png',
+                      description: 'Cards & More',
+                      supported: ['USD', 'EUR', 'GBP'],
+                    },
+                    monnify: {
+                      name: 'Monnify',
+                      logo: '/logos/monnify-logo.png',
+                      description: 'Cards & Transfer',
+                      supported: ['NGN'],
+                    },
+                  }
+
+                  return (
+                    <>
+                      <div className={`grid gap-3 ${availableGateways.length === 1 ? 'grid-cols-1' : availableGateways.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-3'}`}>
+                        {availableGateways.map((gatewayConfig) => {
+                          const config = gatewayConfigs[gatewayConfig.gateway]
+                          const isSelected = selectedGateway === gatewayConfig.gateway
+                          
+                          return (
+                            <button
+                              key={gatewayConfig.gateway}
+                              type="button"
+                              onClick={() => setSelectedGateway(gatewayConfig.gateway)}
+                              className={`p-4 border-2 rounded-lg transition-all ${
+                                isSelected
+                                  ? 'border-primary-gold bg-primary-gold/10'
+                                  : 'border-gray-300 hover:border-primary-gold/50'
+                              }`}
+                            >
+                              <img 
+                                src={config.logo} 
+                                alt={config.name} 
+                                className="mx-auto mb-2 h-12 w-auto object-contain"
+                              />
+                              <p className="font-semibold text-sm text-text-charcoal">{config.name}</p>
+                              <p className="text-xs text-text-charcoal">{config.description}</p>
+                            </button>
+                          )
+                        })}
+                      </div>
+                      <p className="text-xs text-text-charcoal mt-2 text-center">
+                        {availableGateways.length > 1 
+                          ? `Multiple payment methods available for ${currency}. Select your preferred option.`
+                          : `Using ${gatewayConfigs[availableGateways[0].gateway].name} for ${currency} payments.`
+                        }
+                      </p>
+                    </>
+                  )
+                })()}
               </div>
 
-              {/* Manual Currency Selection */}
+              {/* Manual Currency Selection - Custom Styled Dropdown */}
               <div className="pt-4 border-t border-gray-200">
-                <label htmlFor="currency-select" className="block text-sm font-semibold text-secondary-blue mb-2">
+                <label className="block text-sm font-semibold text-secondary-blue mb-2">
                   Change Currency (Optional)
                 </label>
-                <select
-                  id="currency-select"
-                  value={currency}
-                  onChange={(e) => handleCurrencyChange(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-gold focus:border-transparent bg-white"
-                >
-                  <option value="NGN">🇳🇬 NGN - Nigerian Naira</option>
-                  <option value="USD">🇺🇸 USD - US Dollar</option>
-                  <option value="EUR">🇪🇺 EUR - Euro</option>
-                  <option value="GBP">🇬🇧 GBP - British Pound</option>
-                </select>
+                <div className="relative" ref={currencyDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsCurrencyDropdownOpen(!isCurrencyDropdownOpen)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-gold focus:border-transparent bg-white text-left flex items-center justify-between hover:border-primary-gold/50 transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="text-lg">{CURRENCY_INFO[currency as keyof typeof CURRENCY_INFO]?.flag}</span>
+                      <span className="font-medium text-text-charcoal">
+                        {currency} - {CURRENCY_INFO[currency as keyof typeof CURRENCY_INFO]?.name}
+                      </span>
+                    </span>
+                    <ChevronDown 
+                      className={`text-gray-400 transition-transform ${isCurrencyDropdownOpen ? 'rotate-180' : ''}`} 
+                      size={20} 
+                    />
+                  </button>
+                  
+                  {isCurrencyDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
+                    >
+                      {SUPPORTED_CURRENCIES.map((curr) => {
+                        const currencyInfo = CURRENCY_INFO[curr]
+                        const isSelected = currency === curr
+                        return (
+                          <button
+                            key={curr}
+                            type="button"
+                            onClick={() => {
+                              handleCurrencyChange(curr)
+                              setIsCurrencyDropdownOpen(false)
+                            }}
+                            className={`w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-primary-gold/10 transition-colors ${
+                              isSelected 
+                                ? 'bg-primary-gold/5 border-l-4 border-primary-gold' 
+                                : 'border-l-4 border-transparent'
+                            }`}
+                          >
+                            <span className="text-lg">{currencyInfo.flag}</span>
+                            <div className="flex-1">
+                              <div className="font-medium text-text-charcoal">
+                                {currencyInfo.code} - {currencyInfo.name}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                Symbol: {currencyInfo.symbol}
+                              </div>
+                            </div>
+                            {isSelected && (
+                              <Shield className="text-primary-gold" size={16} />
+                            )}
+                          </button>
+                        )
+                      })}
+                    </motion.div>
+                  )}
+                </div>
               </div>
 
+              {/* Error Display */}
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-start space-x-2">
+                    <AlertCircle className="text-red-600 mt-0.5" size={20} />
+                    <p className="text-sm text-red-800">{error}</p>
+                  </div>
+                </div>
+              )}
+
               <button
-                onClick={() => handleDonate(customAmount)}
-                disabled={isProcessing}
+                type="submit"
+                disabled={isProcessing || !selectedGateway}
                 className="btn-primary w-full text-lg py-4 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isProcessing ? (
@@ -480,7 +581,7 @@ const Donate = () => {
                   </>
                 )}
               </button>
-            </div>
+            </form>
 
             <div className="mt-6 p-4 bg-accent-gray rounded-lg">
               <div className="flex items-start space-x-3">
@@ -526,19 +627,34 @@ const Donate = () => {
                   donation buttons above to proceed.
                 </p>
               </div>
-              <div>
-                <h3 className="text-xl font-heading font-bold text-secondary-blue mb-2">
-                  Bank Transfer
-                </h3>
-                <p className="text-text-charcoal mb-2">
-                  You can also make a direct bank transfer to our account:
-                </p>
-                <div className="bg-white p-4 rounded-lg">
-                  <p className="font-semibold text-text-charcoal">Account Name: Child Rights Foundation</p>
-                  <p className="text-text-charcoal">Account Number: [Account Number]</p>
-                  <p className="text-text-charcoal">Bank: [Bank Name]</p>
+              {isBankDetailsConfigured() && (
+                <div>
+                  <h3 className="text-xl font-heading font-bold text-secondary-blue mb-2">
+                    Bank Transfer
+                  </h3>
+                  <p className="text-text-charcoal mb-2">
+                    You can also make a direct bank transfer to our account:
+                  </p>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    {(() => {
+                      const bankDetails = getBankAccountDetails()
+                      return (
+                        <>
+                          <p className="font-semibold text-text-charcoal mb-1">
+                            Account Name: <span className="font-normal">{bankDetails.accountName}</span>
+                          </p>
+                          <p className="text-text-charcoal mb-1">
+                            Account Number: <span className="font-semibold">{bankDetails.accountNumber}</span>
+                          </p>
+                          <p className="text-text-charcoal">
+                            Bank: <span className="font-semibold">{bankDetails.bankName}</span>
+                          </p>
+                        </>
+                      )
+                    })()}
+                  </div>
                 </div>
-              </div>
+              )}
               <div>
                 <h3 className="text-xl font-heading font-bold text-secondary-blue mb-2">
                   Contact Us
@@ -546,8 +662,8 @@ const Donate = () => {
                 <p className="text-text-charcoal">
                   For more information about donations or to discuss partnership opportunities, 
                   please contact us at{' '}
-                  <a href="mailto:donate@thechildrightsfoundation.org" className="text-primary-gold hover:underline">
-                    donate@thechildrightsfoundation.org
+                  <a href={`mailto:${getContactEmail()}`} className="text-primary-gold hover:underline">
+                    {getContactEmail()}
                   </a>
                 </p>
               </div>

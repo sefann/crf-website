@@ -149,8 +149,6 @@ const GetInvolved = () => {
               onSubmit={handleSubmit}
               className="bg-white p-8 rounded-lg shadow-lg"
               data-aos="fade-up"
-              action="https://formspree.io/f/YOUR_FORM_ID"
-              method="POST"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>

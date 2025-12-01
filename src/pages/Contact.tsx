@@ -119,8 +119,6 @@ const Contact = () => {
               <form
                 onSubmit={handleSubmit}
                 className="bg-accent-gray p-8 rounded-lg shadow-lg"
-                action="https://formspree.io/f/YOUR_FORM_ID"
-                method="POST"
               >
                 <div className="mb-6">
                   <label htmlFor="name" className="block text-text-charcoal font-semibold mb-2">
