@@ -158,9 +158,11 @@ const About = () => {
               data-aos="fade-left"
             >
               <div className="h-64 bg-gradient-to-br from-secondary-blue to-secondary-blue/80 flex items-center justify-center">
-                <div className="w-48 h-48 bg-white rounded-full flex items-center justify-center text-6xl font-heading font-bold text-secondary-blue">
-                  AA
-                </div>
+                <img 
+                  src="/images/aaa.JPG" 
+                  alt="Aisha Abdullahi Adamu" 
+                  className="w-48 h-48 rounded-full object-cover border-4 border-white shadow-lg"
+                />
               </div>
               <div className="p-6">
                 <h3 className="text-2xl font-heading font-bold text-secondary-blue mb-2">
